@@ -98,6 +98,18 @@ def get_support_message(decision):
         )
     return ("ok", "No high-concern signal detected. Your feelings still matter — keep journalling.")
 
+# LIME
+CLASS_NAMES = ["NEU", "HUMOR", "MH", "SI"]  # match your model's label order
+
+def lime_predict_proba(texts):
+    probs = []
+    for t in texts:
+        inputs = tokenizer(t, return_tensors="pt", truncation=True, max_length=512)
+        with torch.no_grad():
+            logits = model(**inputs).logits
+        p = torch.softmax(logits, dim=-1).squeeze().numpy()
+        probs.append(p)
+    return np.array(probs)
 
 # ── Styles (dark, low-glare theme) ─────────────────────────────────────────────
 
@@ -505,6 +517,15 @@ div[data-testid="stAlertContainer"] * {
     unsafe_allow_html=True,
 )
 
+dark_wrapper = f"""
+<div style="background:#0f172a;padding:12px;border-radius:10px;">
+<style>
+body {{ background:#0f172a !important; color:#e5e7eb !important; }}
+</style>
+{html_out}
+</div>
+"""
+components.html(dark_wrapper, height=440, scrolling=True)
 
 # ── Top bar ────────────────────────────────────────────────────────────────────
 st.markdown(
@@ -672,6 +693,29 @@ if st.session_state.analysis_done:
     <div class="mj-pill"><span class="mj-pill-key">Top signal</span>{pred_label}</div>
   </div>
 
+   with st.expander("🔍  Why did the model predict this? (LIME explanation)", expanded=False):
+    st.markdown(
+        '<p style="font-size:13.5px;color:#94a3b8;margin:4px 0 14px;line-height:1.6">'
+        "Highlighted words show which parts of your entry pushed the prediction "
+        "toward or away from each category. Green/orange shading indicates influence strength."
+        "</p>",
+        unsafe_allow_html=True,
+    )
+
+    with st.spinner("Generating explanation…"):
+        explainer = LimeTextExplainer(class_names=CLASS_NAMES)
+        exp = explainer.explain_instance(
+            user_text,
+            lime_predict_proba,
+            num_features=10,
+            num_samples=300,
+            labels=list(range(len(CLASS_NAMES))),
+        )
+
+    label_idx = CLASS_NAMES.index(pred_label) if pred_label in CLASS_NAMES else 0
+    html_out = exp.as_html(labels=(label_idx,))
+    components.html(html_out, height=420, scrolling=True)
+ 
 
   <div class="mj-conf-head">Confidence across classes</div>
   {conf_bars_html}
