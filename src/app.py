@@ -517,6 +517,10 @@ div[data-testid="stAlertContainer"] * {
     unsafe_allow_html=True,
 )
 
+import streamlit.components.v1 as components
+
+html_out = exp.as_html(labels=(label_idx,))
+
 dark_wrapper = f"""
 <div style="background:#0f172a;padding:12px;border-radius:10px;">
 <style>
