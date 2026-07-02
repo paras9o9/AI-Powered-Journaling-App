@@ -319,7 +319,7 @@ div[data-testid="stExpander"] summary {
     transition: background 0.12s !important;
 }
 
-div[data-testid="stExpander"] summary:hover { background: #fafafa !important;}
+div[data-testid="stExpander"] summary:hover { background: #fafafa;}
 div[data-testid="stExpander"] details > div { padding: 0 16px 16px !important; color: yellow;}
 
 /* ── Selectbox ── */
