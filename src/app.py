@@ -305,7 +305,7 @@ div[data-testid="stBaseButton-secondary"] > button:hover {
 
 /* ── Expander ── */
 div[data-testid="stExpander"] details {
-    background: #fff !important;
+    # background: #fff !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 14px !important;
     overflow: hidden !important;
