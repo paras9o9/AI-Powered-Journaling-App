@@ -305,6 +305,7 @@ div[data-testid="stExpander"] details {
     border: 1px solid #e2e8f0 !important;
     border-radius: 14px !important;
     overflow: hidden !important;
+    color: black;
 }
 # div[data-testid="stExpander"] summary {
 #     font-weight: 700 !important; color: #1e293b !important;
