@@ -2,12 +2,14 @@ import streamlit as st
 from journal_model import load_model, predict_entry
 from decision_logic import decide_next_step, score_phq9, score_gad7
 
+
 st.set_page_config(
     page_title="MindJournal · AI Support",
     page_icon="🧠",
     layout="centered",
     initial_sidebar_state="collapsed",
 )
+
 
 MODEL_SOURCE = "paras9o9/journal-distilbert-model"
 
@@ -22,6 +24,7 @@ def get_model():
 
 
 tokenizer, model = get_model()
+
 
 # ── Session state ──────────────────────────────────────────────────────────────
 DEFAULTS = {
@@ -43,15 +46,14 @@ for k, v in DEFAULTS.items():
 
 
 def reset_app():
-    # For widget-bound keys, DELETE instead of setting — Streamlit resets them on next run
     widget_keys = {"user_text"}
-    
+
     for k, v in DEFAULTS.items():
         if k in widget_keys:
             if k in st.session_state:
-                del st.session_state[k]   # ← delete widget keys, don't assign to them
+                del st.session_state[k]
         else:
-            st.session_state[k] = v       # ← normal keys are fine to assign
+            st.session_state[k] = v
     st.rerun()
 
 
@@ -62,6 +64,7 @@ BADGE_MAP = {
     "MH": ("Mental health concern", "#d97706", "#fef3c7", "#92400e", "🟡"),
     "SI": ("Suicidal ideation signal", "#dc2626", "#fef2f2", "#991b1b", "🔴"),
 }
+
 
 LABEL_ORDER = [
     ("NEU", "Neutral", "#16a34a"),
@@ -96,114 +99,180 @@ def get_support_message(decision):
     return ("ok", "No high-concern signal detected. Your feelings still matter — keep journalling.")
 
 
-# ── Styles ────────────────────────────────────────────────────────────────────
-st.html("""
+# ── Styles (dark, low-glare theme) ─────────────────────────────────────────────
+
+st.markdown(
+    """
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 html, body, [class*="css"], .stApp {
     font-family: 'Inter', system-ui, sans-serif !important;
     -webkit-font-smoothing: antialiased;
 }
-.stApp { background: #f8fafc; min-height: 100vh; }
+
+:root {
+    --bg: #0b1220;
+    --panel: #111827;
+    --panel-2: #172033;
+    --panel-3: #1e293b;
+    --border: #2b3548;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+    --faint: #64748b;
+    --primary: #7c83ff;
+    --primary-hover: #6d72f6;
+    --success: #22c55e;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+}
+
+.stApp {
+    background: radial-gradient(circle at top, #111827 0%, #0b1220 55%, #09101c 100%);
+    min-height: 100vh;
+    color: var(--text);
+}
+
 .block-container {
-    max-width: 700px !important;
+    max-width: 760px !important;
     padding: 1.75rem 1.5rem 4rem !important;
     margin: 0 auto !important;
 }
+
 #MainMenu, footer, header { visibility: hidden; }
 div[data-testid="stToolbar"] { display: none; }
 
-/* ── Top bar ── */
+/* Top bar */
 .mj-topbar {
-    display: flex; align-items: center;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
     padding-bottom: 1.25rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border);
     margin-bottom: 1.5rem;
 }
 .mj-logo { display: flex; align-items: center; gap: 10px; }
 .mj-logo-icon {
-    width: 34px; height: 34px; background: #4f46e5;
-    border-radius: 9px; display: flex; align-items: center;
-    justify-content: center; font-size: 15px;
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #6d72f6, #4f46e5);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    box-shadow: 0 8px 18px rgba(79,70,229,0.28);
 }
-.mj-logo-name { font-size: 15px; font-weight: 700; color: #0f172a; letter-spacing: -0.01em; }
-.mj-logo-name em { color: #4f46e5; font-style: normal; }
+.mj-logo-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+}
+.mj-logo-name em { color: #9aa0ff; font-style: normal; }
 .mj-emergency-chip {
-    font-size: 11px; font-weight: 600;
-    padding: 4px 10px; border-radius: 999px;
-    background: #fff7ed; color: #9a3412;
-    border: 1px solid #fed7aa; letter-spacing: 0.01em;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(245, 158, 11, 0.10);
+    color: #fdba74;
+    border: 1px solid rgba(245, 158, 11, 0.28);
 }
 
-/* ── Step tabs ── */
+/* Step tabs */
 .mj-tabs {
-    display: flex; gap: 4px; background: #f1f5f9;
-    border-radius: 11px; padding: 3px; margin-bottom: 1.5rem;
+    display: flex;
+    gap: 4px;
+    background: rgba(148,163,184,0.08);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 1.5rem;
 }
 .mj-tab {
-    flex: 1; text-align: center; padding: 7px 4px;
-    border-radius: 8px; font-size: 12px; font-weight: 600;
-    color: #64748b;
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
 }
 .mj-tab.active {
-    background: #fff; color: #4f46e5;
-    box-shadow: 0 1px 3px rgba(15,23,42,0.08), 0 0 0 0.5px #e2e8f0;
+    background: var(--panel-2);
+    color: #c7d2fe;
+    box-shadow: inset 0 0 0 1px rgba(124,131,255,0.18);
 }
 
-/* ── Cards ── */
+/* Cards */
 .mj-card {
-    background: #fff;
-    border: 1px solid #e8edf3;
-    border-radius: 16px;
-    padding: 1.4rem 1.5rem;
+    background: linear-gradient(180deg, rgba(23,32,51,0.96), rgba(17,24,39,0.98));
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.35rem 1.4rem;
     margin-bottom: 1rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.22);
 }
 .mj-card-label {
-    font-size: 11px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.09em;
-    color: #6366f1; margin-bottom: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: #9aa0ff;
+    margin-bottom: 6px;
 }
 .mj-card-title {
-    font-size: 17px; font-weight: 700;
-    color: #0f172a; margin-bottom: 5px; letter-spacing: -0.01em;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
 }
 .mj-card-body {
-    font-size: 14px; color: #64748b; line-height: 1.6; margin: 0;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 0;
 }
 
-/* ── Word count ── */
+/* Word count */
 .mj-wc {
-    display: flex; align-items: center; gap: 7px;
-    font-size: 12px; color: #94a3b8; margin: 8px 0 14px; font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--muted);
+    margin: 8px 0 14px;
+    font-weight: 500;
 }
 
-/* ── Textarea ── */
+/* Textarea */
 div[data-testid="stTextArea"] { margin-top: 10px; }
 div[data-testid="stTextArea"] textarea {
-    border-radius: 11px !important;
-    border: 1.5px solid #cbd5e1 !important;
-    background: #f8fafc !important;
-    color: #0f172a !important;
-    caret-color: #4f46e5 !important;
+    border-radius: 12px !important;
+    border: 1.5px solid var(--border) !important;
+    background: #0f172a !important;
+    color: var(--text) !important;
+    caret-color: #9aa0ff !important;
     padding: 13px 14px !important;
     font-size: 14px !important;
     line-height: 1.65 !important;
     font-family: 'Inter', system-ui, sans-serif !important;
     resize: vertical !important;
-    transition: border-color 0.15s, box-shadow 0.15s !important;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s !important;
 }
 div[data-testid="stTextArea"] textarea:focus {
-    border-color: #6366f1 !important;
-    background: #fff !important;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
+    border-color: #7c83ff !important;
+    background: #111827 !important;
+    box-shadow: 0 0 0 3px rgba(124,131,255,0.16) !important;
     outline: none !important;
 }
 div[data-testid="stTextArea"] textarea::placeholder {
-    color: #94a3b8 !important; font-style: italic !important;
+    color: #6b7280 !important;
+    font-style: italic !important;
 }
 
-/* ── Buttons ── */
+/* Buttons */
 div[data-testid="stButton"] > button,
 div[data-testid="stFormSubmitButton"] > button {
     border-radius: 10px !important;
@@ -212,134 +281,230 @@ div[data-testid="stFormSubmitButton"] > button {
     font-weight: 700 !important;
     font-family: 'Inter', system-ui, sans-serif !important;
     letter-spacing: 0.01em !important;
-    transition: all 0.14s ease !important;
+    transition: all 0.16s ease !important;
     cursor: pointer !important;
 }
 
 div[data-testid="stBaseButton-primary"] > button,
 div[data-testid="stFormSubmitButton"] > button {
-    background: #4f46e5 !important;
-    color: #fff !important;
+    background: linear-gradient(135deg, var(--primary), #5b61f2) !important;
+    color: #ffffff !important;
     border: none !important;
-    box-shadow: 0 1px 2px rgba(79,70,229,0.25) !important;
+    box-shadow: 0 6px 18px rgba(92,97,242,0.28) !important;
 }
-
 div[data-testid="stBaseButton-primary"] > button:hover,
 div[data-testid="stFormSubmitButton"] > button:hover {
-    background: #4338ca !important;
-    box-shadow: 0 4px 12px rgba(79,70,229,0.3) !important;
+    background: linear-gradient(135deg, var(--primary-hover), #5057e8) !important;
+    color: #ffffff !important;
     transform: translateY(-1px) !important;
+    box-shadow: 0 10px 22px rgba(92,97,242,0.34) !important;
+}
+div[data-testid="stBaseButton-primary"] > button * ,
+div[data-testid="stFormSubmitButton"] > button * {
+    color: #ffffff !important;
 }
 
+/* Reset button fix */
 div[data-testid="stBaseButton-secondary"] > button {
-    background: #fff !important;
-    color: #475569 !important;
-    border: 1.5px solid #e2e8f0 !important;
-    box-shadow: 0 1px 2px rgba(15,23,42,0.05) !important;
+    background: #182235 !important;
+    color: #dbe4f0 !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.20) !important;
 }
-
 div[data-testid="stBaseButton-secondary"] > button:hover {
-    background: #43ff64d9 !important;
-    border-color: #cbd5e1 !important;
-    color: #0f172a !important;
+    background: #22304a !important;
+    border-color: #3b4a63 !important;
+    color: #ffffff !important;
+}
+div[data-testid="stBaseButton-secondary"] > button * {
+    color: inherit !important;
+}
+div[data-testid="stBaseButton-secondary"] > button:hover * {
+    color: #ffffff !important;
 }
 
-/* ── Result badge ── */
+/* Badge / pills */
 .mj-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 6px 15px; border-radius: 999px;
-    font-size: 13px; font-weight: 700; margin-bottom: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 15px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 14px;
 }
-
-/* ── Metric pills ── */
 .mj-pills { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
 .mj-pill {
-    background: #f8fafc; border: 1px solid #e2e8f0;
-    border-radius: 8px; padding: 6px 12px;
-    font-size: 12px; font-weight: 600; color: #334155;
+    background: rgba(148,163,184,0.08);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #dbe4f0;
 }
-.mj-pill-key { color: #94a3b8; font-weight: 500; margin-right: 4px; }
+.mj-pill-key { color: var(--muted); font-weight: 500; margin-right: 4px; }
 
-/* ── Confidence bars ── */
+/* Confidence bars */
 .mj-conf-head {
-    font-size: 11px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 11px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 11px;
 }
 .mj-conf-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
 .mj-conf-name {
-    font-size: 12.5px; font-weight: 600; color: #334155;
-    width: 175px; flex-shrink: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #dbe4f0;
+    width: 175px;
+    flex-shrink: 0;
 }
 .mj-conf-track {
-    flex: 1; height: 7px; background: #f1f5f9;
-    border-radius: 99px; overflow: hidden;
+    flex: 1;
+    height: 7px;
+    background: #202b3d;
+    border-radius: 99px;
+    overflow: hidden;
 }
 .mj-conf-fill { height: 100%; border-radius: 99px; }
-.mj-conf-pct { font-size: 12px; font-weight: 700; color: #64748b; width: 34px; text-align: right; }
+.mj-conf-pct {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    width: 34px;
+    text-align: right;
+}
 
-/* ── Message boxes ── */
+/* Message boxes */
 .mj-msg {
-    border-radius: 11px; padding: 13px 15px;
-    font-size: 13.5px; line-height: 1.6; font-weight: 500;
-    display: flex; gap: 11px; align-items: flex-start; margin-top: 2px;
+    border-radius: 11px;
+    padding: 13px 15px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    font-weight: 500;
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    margin-top: 2px;
 }
 .mj-msg-icon { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
-.mj-crisis { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
-.mj-warn   { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
-.mj-info   { background: #eff6ff; color: #1d4ed8; border: 1px solid #93c5fd; }
-.mj-soft   { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-.mj-ok     { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.mj-crisis { background: rgba(239,68,68,0.12); color: #fecaca; border: 1px solid rgba(239,68,68,0.28); }
+.mj-warn   { background: rgba(245,158,11,0.12); color: #fde68a; border: 1px solid rgba(245,158,11,0.28); }
+.mj-info   { background: rgba(59,130,246,0.12); color: #bfdbfe; border: 1px solid rgba(59,130,246,0.28); }
+.mj-soft   { background: rgba(34,197,94,0.12); color: #bbf7d0; border: 1px solid rgba(34,197,94,0.28); }
+.mj-ok     { background: rgba(34,197,94,0.12); color: #bbf7d0; border: 1px solid rgba(34,197,94,0.28); }
 
-/* ── Questionnaire results ── */
+/* Questionnaire headings */
 .mj-q-sec-label {
-    font-size: 11px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.08em; color: #6366f1;
-    padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; margin-bottom: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9aa0ff;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(148,163,184,0.14);
+    margin-bottom: 12px;
 }
 .mj-q-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 6px; }
 .mj-q-pill { border-radius: 9px; padding: 7px 13px; font-size: 13px; font-weight: 700; }
-.mj-q-min  { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-.mj-q-mild { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
-.mj-q-mod  { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
-.mj-q-sev  { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+.mj-q-min  { background: rgba(34,197,94,0.12); color: #bbf7d0; border: 1px solid rgba(34,197,94,0.28); }
+.mj-q-mild { background: rgba(234,179,8,0.12); color: #fde68a; border: 1px solid rgba(234,179,8,0.28); }
+.mj-q-mod  { background: rgba(245,158,11,0.12); color: #fdba74; border: 1px solid rgba(245,158,11,0.28); }
+.mj-q-sev  { background: rgba(239,68,68,0.12); color: #fecaca; border: 1px solid rgba(239,68,68,0.28); }
 
-/* ── Expander ── */
+/* Expander fix */
 div[data-testid="stExpander"] details {
-    # background: #fff !important;
-    border: 1px solid #e2e8f0 !important;
+    background: #111827 !important;
+    border: 1px solid var(--border) !important;
     border-radius: 14px !important;
     overflow: hidden !important;
 }
-
 div[data-testid="stExpander"] summary {
-    font-weight: 700 !important; 
-    color: black;
-    font-size: 14px !important; 
     padding: 14px 16px !important;
-    transition: background 0.12s !important;
+    background: #131c2e !important;
+    transition: background 0.12s ease !important;
+}
+div[data-testid="stExpander"] summary:hover {
+    background: #1a2740 !important;
+}
+div[data-testid="stExpander"] summary p,
+div[data-testid="stExpander"] summary span {
+    font-weight: 700 !important;
+    color: #e5e7eb !important;
+    font-size: 14px !important;
+}
+div[data-testid="stExpander"] summary:hover p,
+div[data-testid="stExpander"] summary:hover span {
+    color: #ffffff !important;
+}
+div[data-testid="stExpander"] details > div {
+    padding: 0 16px 16px !important;
+    background: #111827 !important;
+    color: var(--text) !important;
 }
 
-# div[data-testid="stExpander"] summary:hover { background: red;}
-div[data-testid="stExpander"] details > div { padding: 0 16px 16px !important;}
-
-/* ── Selectbox ── */
-div[data-testid="stSelectbox"] > div > div {
-    border-radius: 9px !important;
-    border-color: #e2e8f0 !important;
-    background: #f8fafc !important;
-    font-size: 13.5px !important;
-    color: black !important;
+/* Form question labels */
+div[data-testid="stSelectbox"] label,
+div[data-testid="stSelectbox"] label p,
+div[data-testid="stSelectbox"] > label,
+div[data-testid="stSelectbox"] > label p {
+    color: #e5e7eb !important;
+    font-weight: 600 !important;
 }
 
-/* ── Footer ── */
+/* Selectbox visible field */
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+    border-radius: 10px !important;
+    border: 1px solid var(--border) !important;
+    background: #0f172a !important;
+    color: #f3f4f6 !important;
+    min-height: 44px !important;
+}
+div[data-testid="stSelectbox"] div[data-baseweb="select"] span,
+div[data-testid="stSelectbox"] div[data-baseweb="select"] div {
+    color: #f3f4f6 !important;
+}
+
+/* Dropdown menu */
+div[role="listbox"] ul,
+div[data-baseweb="popover"] ul {
+    background: #111827 !important;
+    color: #f3f4f6 !important;
+}
+div[role="option"] {
+    background: #111827 !important;
+    color: #f3f4f6 !important;
+}
+div[role="option"]:hover {
+    background: #1f2937 !important;
+    color: #ffffff !important;
+}
+
+/* Alerts */
+div[data-testid="stAlertContainer"] * {
+    color: inherit !important;
+}
+
+/* Footer */
 .mj-footer {
-    text-align: center; font-size: 12px; color: #94a3b8;
-    padding-top: 1.25rem; border-top: 1px solid #e2e8f0;
-    margin-top: 2rem; line-height: 1.7;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+    line-height: 1.7;
 }
-.mj-footer strong { color: #64748b; }
+.mj-footer strong { color: #dbe4f0; }
 </style>
-""")
+""",
+    unsafe_allow_html=True,
+)
+
 
 # ── Top bar ────────────────────────────────────────────────────────────────────
 st.markdown(
@@ -355,6 +520,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
 # ── Step tabs ──────────────────────────────────────────────────────────────────
 if st.session_state.analysis_done and st.session_state.q_submitted:
     active = 2
@@ -363,8 +529,10 @@ elif st.session_state.analysis_done:
 else:
     active = 0
 
+
 tab_classes = ["", "", ""]
 tab_classes[active] = " active"
+
 
 st.markdown(
     f"""
@@ -377,17 +545,19 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
 # ── Step 1 ─────────────────────────────────────────────────────────────────────
 st.markdown(
     """
 <div class="mj-card">
   <div class="mj-card-label">Step 1 of 3 · Your entry</div>
   <div class="mj-card-title">What's on your mind today?</div>
-  <div class="mj-card-body">Write freely, your thoughts, your day, anything weighing on you. Processed locally.</div>
+  <div class="mj-card-body">Write freely, your thoughts, your day, anything weighing on you.</div>
 </div>
 """,
     unsafe_allow_html=True,
 )
+
 
 user_text = st.text_area(
     "Journal entry",
@@ -400,7 +570,9 @@ user_text = st.text_area(
     label_visibility="collapsed",
 )
 
+
 word_count = len(user_text.split()) if user_text.strip() else 0
+
 
 if word_count == 0:
     wc_color, wc_dot, wc_hint = "#94a3b8", "#cbd5e1", "Try writing at least 2–3 sentences for better feedback."
@@ -410,6 +582,7 @@ elif word_count <= 150:
     wc_color, wc_dot, wc_hint = "#16a34a", "#16a34a", "Good length."
 else:
     wc_color, wc_dot, wc_hint = "#d97706", "#d97706", "Long entry — the model reads up to ~512 tokens."
+
 
 st.markdown(
     f'<div class="mj-wc">'
@@ -421,12 +594,14 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
 col_analyse, col_reset = st.columns([5, 1])
 with col_analyse:
     analyse = st.button("Analyse my entry", type="primary", use_container_width=True)
 with col_reset:
     if st.button("Reset", use_container_width=True):
         reset_app()
+
 
 # ── Run analysis ───────────────────────────────────────────────────────────────
 if analyse:
@@ -451,16 +626,19 @@ if analyse:
             final_decision=None,
         )
 
+
 # ── Results ────────────────────────────────────────────────────────────────────
 if st.session_state.analysis_done:
     pred_label = st.session_state.pred_label
     prob_dict = st.session_state.prob_dict
     decision = st.session_state.decision
 
+
     _, label_color, label_bg, label_text_color, label_icon = get_badge(pred_label)
     label_name = BADGE_MAP.get(pred_label, (pred_label,))[0]
     msg_type, msg_text = get_support_message(decision)
     risk_tier = decision.get("risk_tier", "low").capitalize()
+
 
     conf_bars_html = ""
     for code, name, bar_color in LABEL_ORDER:
@@ -475,21 +653,25 @@ if st.session_state.analysis_done:
             f'</div>'
         )
 
+
     st.markdown(
         f"""
 <div class="mj-card">
   <div class="mj-card-label">Step 2 of 3 · Analysis result</div>
   <div class="mj-card-title">Model interpretation</div>
 
+
   <div class="mj-badge"
        style="background:{label_bg};color:{label_text_color};border:1px solid {label_color}55">
     {label_icon}&nbsp; {label_name}
   </div>
 
+
   <div class="mj-pills">
     <div class="mj-pill"><span class="mj-pill-key">Risk tier</span>{risk_tier}</div>
     <div class="mj-pill"><span class="mj-pill-key">Top signal</span>{pred_label}</div>
   </div>
+
 
   <div class="mj-conf-head">Confidence across classes</div>
   {conf_bars_html}
@@ -497,6 +679,7 @@ if st.session_state.analysis_done:
 """,
         unsafe_allow_html=True,
     )
+
 
     MSG_ICONS = {"crisis": "⛑️", "warn": "⚠️", "info": "💬", "soft": "🌿", "ok": "✅"}
     MSG_CLASSES = {
@@ -508,6 +691,7 @@ if st.session_state.analysis_done:
     }
     icon = MSG_ICONS.get(msg_type, "•")
     cls = MSG_CLASSES.get(msg_type, "mj-ok")
+
 
     st.markdown(
         f"""
@@ -523,15 +707,17 @@ if st.session_state.analysis_done:
         unsafe_allow_html=True,
     )
 
+
     show_prompt = decision.get("showphqgadprompt") or decision.get("show_phq_gad_prompt")
     if show_prompt:
-        with st.expander("📋  Optional: PHQ-9 and GAD-7 check-in", expanded=False):
+        with st.expander("📋  Optional: PHQ‑9 and GAD‑7 check-in", expanded=False):
             st.markdown(
-                '<p style="font-size:13.5px;color:#64748b;margin:4px 0 16px;line-height:1.6">'
+                '<p style="font-size:13.5px;color:#94a3b8;margin:4px 0 16px;line-height:1.6">'
                 "These brief validated questionnaires give a more structured check-in "
                 "on mood and anxiety.</p>",
                 unsafe_allow_html=True,
             )
+
 
             RESP = {
                 0: "Not at all",
@@ -560,9 +746,10 @@ if st.session_state.analysis_done:
                 "Feeling afraid as if something awful might happen",
             ]
 
+
             with st.form("questionnaire_form"):
                 st.markdown(
-                    '<div class="mj-q-sec-label">PHQ-9 · Depression screen</div>',
+                    '<div class="mj-q-sec-label">PHQ‑9 · Depression screen</div>',
                     unsafe_allow_html=True,
                 )
                 phq_answers = [
@@ -576,7 +763,7 @@ if st.session_state.analysis_done:
                 ]
                 st.markdown("<br>", unsafe_allow_html=True)
                 st.markdown(
-                    '<div class="mj-q-sec-label">GAD-7 · Anxiety screen</div>',
+                    '<div class="mj-q-sec-label">GAD‑7 · Anxiety screen</div>',
                     unsafe_allow_html=True,
                 )
                 gad_answers = [
@@ -591,6 +778,7 @@ if st.session_state.analysis_done:
                 submitted = st.form_submit_button(
                     "Submit questionnaires", use_container_width=True
                 )
+
 
             if submitted:
                 phq_total, phq_severity = score_phq9(phq_answers)
@@ -610,10 +798,12 @@ if st.session_state.analysis_done:
                     final_decision=final_decision,
                 )
 
+
             if st.session_state.q_submitted:
                 fd = st.session_state.final_decision
                 ph_sev = (st.session_state.phq_severity or "").lower()
                 ga_sev = (st.session_state.gad_severity or "").lower()
+
 
                 def sev_class(s):
                     if "severe" in s:
@@ -624,26 +814,28 @@ if st.session_state.analysis_done:
                         return "mj-q-mild"
                     return "mj-q-min"
 
+
                 st.markdown(
                     f"""
-<p style="font-size:14px;font-weight:700;color:#0f172a;margin:16px 0 4px">
+<p style="font-size:14px;font-weight:700;color:#e5e7eb;margin:16px 0 4px">
   Questionnaire results
 </p>
 <div class="mj-q-pills">
   <div class="mj-q-pill {sev_class(ph_sev)}">
-    PHQ-9: {st.session_state.phq_total} &nbsp;·&nbsp; {ph_sev.capitalize()}
+    PHQ‑9: {st.session_state.phq_total} &nbsp;·&nbsp; {ph_sev.capitalize()}
   </div>
   <div class="mj-q-pill {sev_class(ga_sev)}">
-    GAD-7: {st.session_state.gad_total} &nbsp;·&nbsp; {ga_sev.capitalize()}
+    GAD‑7: {st.session_state.gad_total} &nbsp;·&nbsp; {ga_sev.capitalize()}
   </div>
 </div>
 """,
                     unsafe_allow_html=True,
                 )
 
+
                 if fd.get("suicidalityflag") or fd.get("suicidality_flag"):
                     st.error(
-                        "You indicated possible self-harm thoughts on PHQ-9 item 9. "
+                        "You indicated possible self-harm thoughts on PHQ‑9 item 9. "
                         "Please seek immediate support. iCall India: **9152987821**"
                     )
                 elif fd.get("recommendation") == "seek_professional_help":
@@ -658,6 +850,7 @@ if st.session_state.analysis_done:
                     st.success(
                         "Thank you for completing the check-in. Keep taking care of yourself."
                     )
+
 
 # ── Footer ─────────────────────────────────────────────────────────────────────
 st.markdown(
