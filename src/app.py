@@ -307,6 +307,9 @@ div[data-testid="stExpander"] details {
     overflow: hidden !important;
     color: black;
 }
+
+div[data-testid="stExpander"] details:hover { color: white;}
+
 # div[data-testid="stExpander"] summary {
 #     font-weight: 700 !important; color: #1e293b !important;
 #     font-size: 14px !important; padding: 14px 16px !important;
