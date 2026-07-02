@@ -138,7 +138,7 @@ html, body, [class*="css"], .stApp {
     margin: 0 auto !important;
 }
 
-#MainMenu, footer, header { visibility: hidden; }
+MainMenu, footer, header { visibility: hidden; }
 div[data-testid="stToolbar"] { display: none; }
 
 /* Top bar */
