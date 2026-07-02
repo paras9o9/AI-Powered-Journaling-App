@@ -311,7 +311,7 @@ div[data-testid="stExpander"] summary {
     font-weight: 700 !important; color: #1e293b !important;
     font-size: 14px !important; padding: 14px 16px !important;
     transition: background 0.12s !important;
-    color: black;
+    color: yellow;
 }
 
 # div[data-testid="stExpander"] summary:hover { background: #fafafa !important;}
