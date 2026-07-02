@@ -1,4 +1,8 @@
 import streamlit as st
+import numpy as np
+import torch
+from lime.lime_text import LimeTextExplainer
+import streamlit.components.v1 as components
 from journal_model import load_model, predict_entry
 from decision_logic import decide_next_step, score_phq9, score_gad7
 
@@ -98,8 +102,10 @@ def get_support_message(decision):
         )
     return ("ok", "No high-concern signal detected. Your feelings still matter — keep journalling.")
 
-# LIME
-CLASS_NAMES = ["NEU", "HUMOR", "MH", "SI"]  # match your model's label order
+
+# ── LIME setup ─────────────────────────────────────────────────────────────────
+CLASS_NAMES = ["NEU", "HUMOR", "MH", "SI"]  # must match your model's label order
+
 
 def lime_predict_proba(texts):
     probs = []
@@ -111,8 +117,8 @@ def lime_predict_proba(texts):
         probs.append(p)
     return np.array(probs)
 
-# ── Styles (dark, low-glare theme) ─────────────────────────────────────────────
 
+# ── Styles (dark, low-glare theme) ─────────────────────────────────────────────
 st.markdown(
     """
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -150,7 +156,7 @@ html, body, [class*="css"], .stApp {
     margin: 0 auto !important;
 }
 
-MainMenu, footer, header { visibility: hidden; }
+#MainMenu, footer, header { visibility: hidden; }
 div[data-testid="stToolbar"] { display: none; }
 
 /* Top bar */
@@ -517,20 +523,6 @@ div[data-testid="stAlertContainer"] * {
     unsafe_allow_html=True,
 )
 
-import streamlit.components.v1 as components
-
-html_out = exp.as_html(labels=(label_idx,))
-
-dark_wrapper = f"""
-<div style="background:#0f172a;padding:12px;border-radius:10px;">
-<style>
-body {{ background:#0f172a !important; color:#e5e7eb !important; }}
-</style>
-{html_out}
-</div>
-"""
-components.html(dark_wrapper, height=440, scrolling=True)
-
 # ── Top bar ────────────────────────────────────────────────────────────────────
 st.markdown(
     """
@@ -658,12 +650,10 @@ if st.session_state.analysis_done:
     prob_dict = st.session_state.prob_dict
     decision = st.session_state.decision
 
-
     _, label_color, label_bg, label_text_color, label_icon = get_badge(pred_label)
     label_name = BADGE_MAP.get(pred_label, (pred_label,))[0]
     msg_type, msg_text = get_support_message(decision)
     risk_tier = decision.get("risk_tier", "low").capitalize()
-
 
     conf_bars_html = ""
     for code, name, bar_color in LABEL_ORDER:
@@ -678,56 +668,65 @@ if st.session_state.analysis_done:
             f'</div>'
         )
 
-
+    # Card: badge + risk pills
     st.markdown(
         f"""
 <div class="mj-card">
   <div class="mj-card-label">Step 2 of 3 · Analysis result</div>
   <div class="mj-card-title">Model interpretation</div>
 
-
   <div class="mj-badge"
        style="background:{label_bg};color:{label_text_color};border:1px solid {label_color}55">
     {label_icon}&nbsp; {label_name}
   </div>
 
-
   <div class="mj-pills">
     <div class="mj-pill"><span class="mj-pill-key">Risk tier</span>{risk_tier}</div>
     <div class="mj-pill"><span class="mj-pill-key">Top signal</span>{pred_label}</div>
   </div>
-
-   with st.expander("🔍  Why did the model predict this? (LIME explanation)", expanded=False):
-    st.markdown(
-        '<p style="font-size:13.5px;color:#94a3b8;margin:4px 0 14px;line-height:1.6">'
-        "Highlighted words show which parts of your entry pushed the prediction "
-        "toward or away from each category. Green/orange shading indicates influence strength."
-        "</p>",
+</div>
+""",
         unsafe_allow_html=True,
     )
 
-    with st.spinner("Generating explanation…"):
-        explainer = LimeTextExplainer(class_names=CLASS_NAMES)
-        exp = explainer.explain_instance(
-            user_text,
-            lime_predict_proba,
-            num_features=10,
-            num_samples=300,
-            labels=list(range(len(CLASS_NAMES))),
+    # LIME explainer — real Python, executed as a Streamlit widget (not inside an HTML string)
+    with st.expander("🔍  Why did the model predict this? (LIME explanation)", expanded=False):
+        st.markdown(
+            '<p style="font-size:13.5px;color:#94a3b8;margin:4px 0 14px;line-height:1.6">'
+            "Highlighted words show which parts of your entry pushed the prediction "
+            "toward or away from each category. Shading intensity reflects influence strength."
+            "</p>",
+            unsafe_allow_html=True,
         )
+        with st.spinner("Generating explanation…"):
+            explainer = LimeTextExplainer(class_names=CLASS_NAMES)
+            lime_exp = explainer.explain_instance(
+                user_text,
+                lime_predict_proba,
+                num_features=10,
+                num_samples=300,
+                labels=list(range(len(CLASS_NAMES))),
+            )
+        label_idx = CLASS_NAMES.index(pred_label) if pred_label in CLASS_NAMES else 0
+        lime_html = lime_exp.as_html(labels=(label_idx,))
+        dark_wrapper = f"""
+<div style="background:#0f172a;padding:12px;border-radius:10px;">
+<style>body {{ background:#0f172a !important; color:#e5e7eb !important; }}</style>
+{lime_html}
+</div>
+"""
+        components.html(dark_wrapper, height=440, scrolling=True)
 
-    label_idx = CLASS_NAMES.index(pred_label) if pred_label in CLASS_NAMES else 0
-    html_out = exp.as_html(labels=(label_idx,))
-    components.html(html_out, height=420, scrolling=True)
- 
-
+    # Card: confidence bars
+    st.markdown(
+        f"""
+<div class="mj-card">
   <div class="mj-conf-head">Confidence across classes</div>
   {conf_bars_html}
 </div>
 """,
         unsafe_allow_html=True,
     )
-
 
     MSG_ICONS = {"crisis": "⛑️", "warn": "⚠️", "info": "💬", "soft": "🌿", "ok": "✅"}
     MSG_CLASSES = {
@@ -739,7 +738,6 @@ if st.session_state.analysis_done:
     }
     icon = MSG_ICONS.get(msg_type, "•")
     cls = MSG_CLASSES.get(msg_type, "mj-ok")
-
 
     st.markdown(
         f"""
@@ -755,17 +753,15 @@ if st.session_state.analysis_done:
         unsafe_allow_html=True,
     )
 
-
     show_prompt = decision.get("showphqgadprompt") or decision.get("show_phq_gad_prompt")
     if show_prompt:
-        with st.expander("📋  Optional: PHQ‑9 and GAD‑7 check-in", expanded=False):
+        with st.expander("📋  Optional: PHQ-9 and GAD-7 check-in", expanded=False):
             st.markdown(
                 '<p style="font-size:13.5px;color:#94a3b8;margin:4px 0 16px;line-height:1.6">'
                 "These brief validated questionnaires give a more structured check-in "
                 "on mood and anxiety.</p>",
                 unsafe_allow_html=True,
             )
-
 
             RESP = {
                 0: "Not at all",
@@ -794,10 +790,9 @@ if st.session_state.analysis_done:
                 "Feeling afraid as if something awful might happen",
             ]
 
-
             with st.form("questionnaire_form"):
                 st.markdown(
-                    '<div class="mj-q-sec-label">PHQ‑9 · Depression screen</div>',
+                    '<div class="mj-q-sec-label">PHQ-9 · Depression screen</div>',
                     unsafe_allow_html=True,
                 )
                 phq_answers = [
@@ -811,7 +806,7 @@ if st.session_state.analysis_done:
                 ]
                 st.markdown("<br>", unsafe_allow_html=True)
                 st.markdown(
-                    '<div class="mj-q-sec-label">GAD‑7 · Anxiety screen</div>',
+                    '<div class="mj-q-sec-label">GAD-7 · Anxiety screen</div>',
                     unsafe_allow_html=True,
                 )
                 gad_answers = [
@@ -826,7 +821,6 @@ if st.session_state.analysis_done:
                 submitted = st.form_submit_button(
                     "Submit questionnaires", use_container_width=True
                 )
-
 
             if submitted:
                 phq_total, phq_severity = score_phq9(phq_answers)
@@ -846,12 +840,10 @@ if st.session_state.analysis_done:
                     final_decision=final_decision,
                 )
 
-
             if st.session_state.q_submitted:
                 fd = st.session_state.final_decision
                 ph_sev = (st.session_state.phq_severity or "").lower()
                 ga_sev = (st.session_state.gad_severity or "").lower()
-
 
                 def sev_class(s):
                     if "severe" in s:
@@ -862,7 +854,6 @@ if st.session_state.analysis_done:
                         return "mj-q-mild"
                     return "mj-q-min"
 
-
                 st.markdown(
                     f"""
 <p style="font-size:14px;font-weight:700;color:#e5e7eb;margin:16px 0 4px">
@@ -870,20 +861,19 @@ if st.session_state.analysis_done:
 </p>
 <div class="mj-q-pills">
   <div class="mj-q-pill {sev_class(ph_sev)}">
-    PHQ‑9: {st.session_state.phq_total} &nbsp;·&nbsp; {ph_sev.capitalize()}
+    PHQ-9: {st.session_state.phq_total} &nbsp;·&nbsp; {ph_sev.capitalize()}
   </div>
   <div class="mj-q-pill {sev_class(ga_sev)}">
-    GAD‑7: {st.session_state.gad_total} &nbsp;·&nbsp; {ga_sev.capitalize()}
+    GAD-7: {st.session_state.gad_total} &nbsp;·&nbsp; {ga_sev.capitalize()}
   </div>
 </div>
 """,
                     unsafe_allow_html=True,
                 )
 
-
                 if fd.get("suicidalityflag") or fd.get("suicidality_flag"):
                     st.error(
-                        "You indicated possible self-harm thoughts on PHQ‑9 item 9. "
+                        "You indicated possible self-harm thoughts on PHQ-9 item 9. "
                         "Please seek immediate support. iCall India: **9152987821**"
                     )
                 elif fd.get("recommendation") == "seek_professional_help":
