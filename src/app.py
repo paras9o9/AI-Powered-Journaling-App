@@ -204,74 +204,78 @@ div[data-testid="stTextArea"] textarea::placeholder {
 }
 
 /* ── Buttons ── */
-# div[data-testid="stButton"] > button,
-# div[data-testid="stFormSubmitButton"] > button {
-#     border-radius: 10px !important;
-#     min-height: 42px !important;
-#     font-size: 13.5px !important;
-#     font-weight: 700 !important;
-#     font-family: 'Inter', system-ui, sans-serif !important;
-#     letter-spacing: 0.01em !important;
-#     transition: all 0.14s ease !important;
-#     cursor: pointer !important;
-# }
-# div[data-testid="stBaseButton-primary"] > button,
-# div[data-testid="stFormSubmitButton"] > button {
-#     background: #4f46e5 !important;
-#     color: #fff !important;
-#     border: none !important;
-#     box-shadow: 0 1px 2px rgba(79,70,229,0.25) !important;
-# }
-# div[data-testid="stBaseButton-primary"] > button:hover,
-# div[data-testid="stFormSubmitButton"] > button:hover {
-#     background: #4338ca !important;
-#     box-shadow: 0 4px 12px rgba(79,70,229,0.3) !important;
-#     transform: translateY(-1px) !important;
-# }
-# div[data-testid="stBaseButton-secondary"] > button {
-#     background: #fff !important;
-#     color: #475569 !important;
-#     border: 1.5px solid #e2e8f0 !important;
-#     box-shadow: 0 1px 2px rgba(15,23,42,0.05) !important;
-# }
-# div[data-testid="stBaseButton-secondary"] > button:hover {
-#     background: #43ff64d9 !important;
-#     border-color: #cbd5e1 !important;
-#     color: #0f172a !important;
-# }
+div[data-testid="stButton"] > button,
+div[data-testid="stFormSubmitButton"] > button {
+    border-radius: 10px !important;
+    min-height: 42px !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    letter-spacing: 0.01em !important;
+    transition: all 0.14s ease !important;
+    cursor: pointer !important;
+}
+
+div[data-testid="stBaseButton-primary"] > button,
+div[data-testid="stFormSubmitButton"] > button {
+    background: #4f46e5 !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 1px 2px rgba(79,70,229,0.25) !important;
+}
+
+div[data-testid="stBaseButton-primary"] > button:hover,
+div[data-testid="stFormSubmitButton"] > button:hover {
+    background: #4338ca !important;
+    box-shadow: 0 4px 12px rgba(79,70,229,0.3) !important;
+    transform: translateY(-1px) !important;
+}
+
+div[data-testid="stBaseButton-secondary"] > button {
+    background: #fff !important;
+    color: #475569 !important;
+    border: 1.5px solid #e2e8f0 !important;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.05) !important;
+}
+
+div[data-testid="stBaseButton-secondary"] > button:hover {
+    background: #43ff64d9 !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
 
 /* ── Result badge ── */
-# .mj-badge {
-#     display: inline-flex; align-items: center; gap: 8px;
-#     padding: 6px 15px; border-radius: 999px;
-#     font-size: 13px; font-weight: 700; margin-bottom: 14px;
-# }
+.mj-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 15px; border-radius: 999px;
+    font-size: 13px; font-weight: 700; margin-bottom: 14px;
+}
 
 /* ── Metric pills ── */
-# .mj-pills { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
-# .mj-pill {
-#     background: #f8fafc; border: 1px solid #e2e8f0;
-#     border-radius: 8px; padding: 6px 12px;
-#     font-size: 12px; font-weight: 600; color: #334155;
-# }
-# .mj-pill-key { color: #94a3b8; font-weight: 500; margin-right: 4px; }
+.mj-pills { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
+.mj-pill {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    border-radius: 8px; padding: 6px 12px;
+    font-size: 12px; font-weight: 600; color: #334155;
+}
+.mj-pill-key { color: #94a3b8; font-weight: 500; margin-right: 4px; }
 
 /* ── Confidence bars ── */
-# .mj-conf-head {
-#     font-size: 11px; font-weight: 700; text-transform: uppercase;
-#     letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 11px;
-# }
-# .mj-conf-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
-# .mj-conf-name {
-#     font-size: 12.5px; font-weight: 600; color: #334155;
-#     width: 175px; flex-shrink: 0;
-# }
-# .mj-conf-track {
-#     flex: 1; height: 7px; background: #f1f5f9;
-#     border-radius: 99px; overflow: hidden;
-# }
-# .mj-conf-fill { height: 100%; border-radius: 99px; }
-# .mj-conf-pct { font-size: 12px; font-weight: 700; color: #64748b; width: 34px; text-align: right; }
+.mj-conf-head {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 11px;
+}
+.mj-conf-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.mj-conf-name {
+    font-size: 12.5px; font-weight: 600; color: #334155;
+    width: 175px; flex-shrink: 0;
+}
+.mj-conf-track {
+    flex: 1; height: 7px; background: #f1f5f9;
+    border-radius: 99px; overflow: hidden;
+}
+.mj-conf-fill { height: 100%; border-radius: 99px; }
+.mj-conf-pct { font-size: 12px; font-weight: 700; color: #64748b; width: 34px; text-align: right; }
 
 /* ── Message boxes ── */
 .mj-msg {
@@ -316,7 +320,7 @@ div[data-testid="stExpander"] summary {
 }
 
 div[data-testid="stExpander"] summary:hover { background: #fafafa !important; color: white;}
-# div[data-testid="stExpander"] details > div { padding: 0 16px 16px !important; }
+div[data-testid="stExpander"] details > div { padding: 0 16px 16px !important; }
 
 /* ── Selectbox ── */
 div[data-testid="stSelectbox"] > div > div {
@@ -329,15 +333,15 @@ div[data-testid="stSelectbox"] > div > div {
 color: black;
 }
 
-# /* ── Footer ── */
-# .mj-footer {
-#     text-align: center; font-size: 12px; color: #94a3b8;
-#     padding-top: 1.25rem; border-top: 1px solid #e2e8f0;
-#     margin-top: 2rem; line-height: 1.7;
-# }
-# .mj-footer strong { color: #64748b; }
-# </style>
-# """)
+/* ── Footer ── */
+.mj-footer {
+    text-align: center; font-size: 12px; color: #94a3b8;
+    padding-top: 1.25rem; border-top: 1px solid #e2e8f0;
+    margin-top: 2rem; line-height: 1.7;
+}
+.mj-footer strong { color: #64748b; }
+</style>
+""")
 
 # ── Top bar ────────────────────────────────────────────────────────────────────
 st.markdown(
