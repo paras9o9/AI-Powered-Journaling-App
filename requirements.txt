@@ -1,14 +1,6 @@
-# requirements.txt
-lime
-
-# app.py imports
-import numpy as np
-import torch
-from lime.lime_text import LimeTextExplainer
-import streamlit.components.v1 as components
-
-# other imports
 streamlit
 transformers
 torch
 safetensors
+lime
+numpy
