@@ -328,7 +328,7 @@ div[data-testid="stSelectbox"] > div > div {
     border-color: #e2e8f0 !important;
     background: #f8fafc !important;
     font-size: 13.5px !important;
-    color: black;
+    color: black !important;
 }
 
 /* ── Footer ── */
