@@ -329,9 +329,9 @@ div[data-testid="stSelectbox"] > div > div {
     background: #f8fafc !important;
     font-size: 13.5px !important;
 
-.st-emotion-cache-1weic72 {
-color: black;
-}
+# .st-emotion-cache-1weic72 {
+# color: black;
+# }
 
 /* ── Footer ── */
 .mj-footer {
