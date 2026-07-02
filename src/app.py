@@ -309,7 +309,7 @@ div[data-testid="stExpander"] details {
 
 div[data-testid="stExpander"] summary {
     font-weight: 700 !important; 
-    color: #yellow !important;
+    color: yellow !important;
     font-size: 14px !important; 
     padding: 14px 16px !important;
     transition: background 0.12s !important;
