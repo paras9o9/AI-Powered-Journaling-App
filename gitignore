@@ -1,0 +1,37 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables / secrets
+.env
+.streamlit/secrets.toml
+
+# Model / large files
+*.bin
+*.pt
+*.safetensors
+*.h5
+model/
+models/
+
+# Data
+data/raw/
+*.csv
+!requirements.txt
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Logs
+*.log
