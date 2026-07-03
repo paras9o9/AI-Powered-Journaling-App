@@ -712,7 +712,7 @@ if st.session_state.analysis_done:
         lime_html = lime_exp.as_html(labels=(label_idx,))
         dark_wrapper = f"""
 <div style="background:#0f172a;padding:12px;border-radius:10px;">
-<style>body {{ background:#0f172a !important; color:#e5e7eb !important; }}</style>
+<style>body {{ background:#0f172a !important; color: red !important; }}</style>
 {lime_html}
 </div>
 """
